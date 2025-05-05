@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./backend  # Le répertoire où se trouve ton Dockerfile
+    volumes:
+      - ./backend:/app  # Monter le répertoire ./backend à /app dans le conteneur
+    container_name: api
+    restart: unless-stopped
+    init: true
+    env_file: ./backend/.env  # Charger les variables d'environnement depuis .env
+    ports:
+      - "8000:8000"  # Exposer le port 8000 de l'API
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/"]  # Vérifier si l'API est accessible
+      interval: 30s  # Intervalle entre les vérifications de santé
+      timeout: 10s    # Timeout pour chaque vérification
+      start_period: 10s  # Temps d'attente avant de commencer les vérifications
+      retries: 3  # Nombre d'essais avant de considérer le conteneur comme défaillant
+
+    networks:
+      - app-network  # Utiliser le réseau défini plus bas
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload  # Lancer l'application FastAPI avec Uvicorn
+
+networks:
+  app-network:
+    driver: bridge  # Utiliser un réseau en mode pont pour la communication entre conteneurs

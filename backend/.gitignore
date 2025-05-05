@@ -1,0 +1,42 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# === Fichiers d’environnement ===
+.env
+.env.*
+
+# === SQLite / Base de données ===
+*.sqlite3
+*.db
+
+# === Logs ===
+*.log
+
+# === Docker ===
+*.pid
+*.sock
+docker-compose.override.yml
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === Tests ===
+.coverage
+htmlcov/
+.tox/
+.nox/
+pytest_cache/
+coverage.xml
+
+# === Autres fichiers temporaires ===
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
