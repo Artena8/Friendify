@@ -26,14 +26,23 @@ def create_db():
     try:
         # création de la db
         Base.metadata.create_all(engine)
-        # données de test
-        db = SessionLocal()
-        from app.tests.data import get_test_data  # Importer après Base pour éviter l'import circulaire
-        test_data = get_test_data() 
-        db.add_all(test_data)
-        db.commit()
-        db.close()
+
+        # Vérifier si le fichier SQLite existe déjà
+        db_file_path = Path(__file__).resolve().parents[2] / "app/database/db.sqlite3"
+        is_new_db = not db_file_path.exists()
+
+        if is_new_db:
+            # données de test (uniquement si nouvelle DB)
+            db = SessionLocal()
+            from app.models import User
+            from app.tests.data import get_test_data
+            test_data = get_test_data()
+            db.add_all(test_data)
+            db.commit()
+            db.close()
+
         db_status = "connected"
     except SQLAlchemyError as e:
         db_status = f"connection failed: {str(e)}"
     return db_status
+

@@ -9,24 +9,15 @@ This project is composed of two main services: a Python FastAPI backend and a Ty
   - Dependencies specified in `backend/requirements.txt`
   - Expects a `.env` file in `backend/` (see below for required variables)
 
-- **Mobile App**
-  - Node.js version 22.14.0
-  - Yarn version 4.6.0
-  - Dependencies specified in `mobile-app/package.json` and `yarn.lock`
-
 ### Environment Variables
 
 - **Backend**
   - Environment variables are loaded from `backend/.env` (example keys: `HOST`, `PORT`, `RELOAD`)
   - The Dockerfile sets defaults: `HOST=0.0.0.0`, `PORT=8000`, `RELOAD=True`
 
-- **Mobile App**
-  - No `.env` file is required by default. If needed, uncomment the `env_file` line in `docker-compose.yml` and provide `mobile-app/.env`.
-
 ### Exposed Ports
 
 - **Backend (FastAPI):** `8000` (host:container)
-- **Mobile App:** `3000` (host:container)
 
 ### Build and Run Instructions
 
@@ -42,14 +33,6 @@ This project is composed of two main services: a Python FastAPI backend and a Ty
 
 4. Access the services:
    - Backend API: [http://localhost:8000](http://localhost:8000)
-   - Mobile App: [http://localhost:3000](http://localhost:3000)
-
-### Special Configuration Notes
-
-- Both services run as non-root users inside their containers for improved security.
-- The backend service uses a healthcheck to ensure the FastAPI app is running.
-- The mobile app service is set up for development; adjust the Dockerfile and compose file for production as needed.
-- Both services are connected via a custom Docker network (`app-network`).
 
 ---
 
