@@ -1,31 +1,33 @@
 from fastapi import FastAPI
 
 from app.database.db import create_db
-from app.api import user_router
+from app.api import user_router,auth_router
 from app.core.cors import add_cors_middleware
 
+from app.const import (
+    OPEN_API_DESCRIPTION,
+    OPEN_API_TITLE
+)
+from app.version import __version__
+
+# ----------------------------------- CONFIG -----------------------------------
 app = FastAPI(    
-    title="Friendify API",
-    description="""
-    API casi-officielle de l'application mobile **Friendify** développée par Artena8.
-    """,
-    version="0.0.1",
-    contact={
-        "name": "Artena8",
-        "url": "https://artena8.github.io/but-portfolio-tailwind/"
-    },
-    license_info={
-        "name": "MIT",
-        "url": "https://opensource.org/licenses/MIT",
-    },
+    title=OPEN_API_TITLE,
+    description=OPEN_API_DESCRIPTION,
+    version=__version__,
     docs_url="/docs",
     redoc_url="/redoc",
-    )
-add_cors_middleware(app)
-app.include_router(user_router)
+)
 
+add_cors_middleware(app)
+
+# ----------------------------------- ROUTERS -----------------------------------
+app.include_router(user_router)
+app.include_router(auth_router)
+
+# ----------------------------------- LAUNCH API -----------------------------------
 db_status = ""
-    
+
 @app.on_event("startup")
 def on_startup():
     global db_status

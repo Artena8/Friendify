@@ -4,4 +4,6 @@ python-dotenv
 sqlalchemy
 sqlmodel
 pyjwt
-passlib
+passlib[bcrypt]
+httpx
+pytest

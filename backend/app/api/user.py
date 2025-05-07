@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.database.db import SessionLocal
 from app.models.user import User
+from app.const import Tags
 
 user_router = APIRouter()
 
@@ -14,12 +15,12 @@ def get_db():
     finally:
         db.close()
 
-@user_router.get("/users", summary="Liste des utilisateurs", tags=["Utilisateurs"])
+@user_router.get("/users", summary="Liste des utilisateurs", tags=[Tags.USERS])
 def read_user(db: Session = Depends(get_db)):
     users = db.query(User).all()
     return users
 
-@user_router.get("/users/{id}", summary="Fiche d'un utilisateur", tags=["Utilisateurs"])
+@user_router.get("/users/{id}", summary="Fiche d'un utilisateur", tags=[Tags.USERS])
 def read_user(id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == id).first()
     if user is None:

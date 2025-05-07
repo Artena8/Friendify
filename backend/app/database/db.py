@@ -5,6 +5,8 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 from pathlib import Path
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+from typing import Generator
 
 # ================================  Création session cnx db ===============================================
 env_path = Path(__file__).resolve().parents[2] / '.env'
@@ -24,25 +26,30 @@ Base = declarative_base()
 # ================================  Fonction de création de la base de données ========================
 def create_db():
     try:
-        # création de la db
-        Base.metadata.create_all(engine)
-
         # Vérifier si le fichier SQLite existe déjà
         db_file_path = Path(__file__).resolve().parents[2] / "app/database/db.sqlite3"
         is_new_db = not db_file_path.exists()
 
         if is_new_db:
+            # création de la db
+            Base.metadata.create_all(engine)
             # données de test (uniquement si nouvelle DB)
             db = SessionLocal()
-            from app.models import User
             from app.tests.data import get_test_data
             test_data = get_test_data()
             db.add_all(test_data)
             db.commit()
-            db.close()
+            db.close()            
 
         db_status = "connected"
     except SQLAlchemyError as e:
         db_status = f"connection failed: {str(e)}"
     return db_status
 
+# ================================  Fonction de création de la base de données ========================
+def get_db() -> Generator[Session, None, None]:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
