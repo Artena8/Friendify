@@ -1,11 +1,8 @@
 import React from 'react';
-import UserList from '@views/UserList';
-import { View } from 'react-native';
+import LoginScreen from '@views/LoginScreen';
 
 export default function App() {
   return (
-    <View>
-      <UserList />
-    </View>
+    <LoginScreen />
   );
 }
