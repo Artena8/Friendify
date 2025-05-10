@@ -1,9 +1,12 @@
 fastapi[all]
 uvicorn[standard]
-python-dotenv
-sqlalchemy
+sqlalchemy[all]
 sqlmodel
+asyncmy
+python-dotenv
 pyjwt
-passlib[bcrypt]
+bcrypt
 httpx
 pytest
+mysql-connector-python
+cryptography

@@ -1,20 +1,20 @@
-from app.utils.security import authenticate_user
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
-from app.database.db import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.services.user_services import authenticate_user
 from app.models.user import User
+from app.database.db import get_db
 from app.schemas.auth import TokenSchema
-from app.services.auth import create_access_token
-from passlib.context import CryptContext
+from app.services.auth_services import create_access_token, get_current_user
 from app.const import Tags
 
 auth_router = APIRouter(tags=[Tags.AUTH])
 
 # ----- ROUTE -----
 @auth_router.post("/login", response_model=TokenSchema, summary="Connexion utilisateur")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = authenticate_user(db, form_data.username, form_data.password)
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    user = await authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -22,5 +22,9 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token = create_access_token(data={"sub": user.email})
+    token = create_access_token(data={"sub": user.name})
     return {"access_token": token, "token_type": "bearer"}
+
+@auth_router.get("/me", summary="Récupérer l'utilisateur connecté")
+async def read_users_me(current_user: User = Depends(get_current_user)):
+    return {"name": current_user.name, "id": current_user.id}

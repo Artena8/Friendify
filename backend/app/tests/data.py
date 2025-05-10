@@ -1,7 +1,6 @@
 
 from app.models.user import User
 from app.utils.security import hash_password
-from fastapi.testclient import TestClient
 
 def get_test_data():
     return [

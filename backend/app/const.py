@@ -19,7 +19,6 @@ Cette API permet de :
 - **FastAPI**
 - **SQLAlchemy**
 - **Docker**
-- **React Native (Expo)**
 
 ### Auteur
 

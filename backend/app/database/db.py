@@ -1,55 +1,62 @@
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+import asyncio
 from dotenv import load_dotenv
-from pathlib import Path
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker,declarative_base
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
-from typing import Generator
+from sqlalchemy import text
+from typing import AsyncGenerator
 
-# ================================  Création session cnx db ===============================================
-env_path = Path(__file__).resolve().parents[2] / '.env'
-load_dotenv(dotenv_path=env_path)
-DATABASE_URL = os.getenv("DATABASE_URL")
-if DATABASE_URL.startswith("sqlite"):
-    BASE_DIR = Path(__file__).resolve().parents[2]
-    DATABASE_URL = f"sqlite:///{BASE_DIR}/app/database/db.sqlite3"
+# ==================================================  Chargement des variables d'environnement ===========================================================
+load_dotenv()
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
 
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+DATABASE_URL = f"mysql+asyncmy://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-# ================================  Création des tables ===============================================
+# ==================================================  Création moteur asynchrone et session ============================================================
+engine = create_async_engine(DATABASE_URL, echo=True, future=True)
+
+# Création de la session asynchrone
+AsyncSessionLocal = sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+    future=True
+)
+
 Base = declarative_base()
 
-# ================================  Fonction de création de la base de données ========================
-def create_db():
+# ================================  Fonction de création de la base de données & injection des données de test ========================
+async def create_db():
     try:
-        # Vérifier si le fichier SQLite existe déjà
-        db_file_path = Path(__file__).resolve().parents[2] / "app/database/db.sqlite3"
-        is_new_db = not db_file_path.exists()
-
-        if is_new_db:
-            # création de la db
-            Base.metadata.create_all(engine)
-            # données de test (uniquement si nouvelle DB)
-            db = SessionLocal()
-            from app.tests.data import get_test_data
-            test_data = get_test_data()
-            db.add_all(test_data)
-            db.commit()
-            db.close()            
-
+        # Création des tables de la base de données
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        
+        # Connexion à la base de données pour vérifier s'il y a des données
+        async with AsyncSessionLocal() as db:
+            has_data = False
+            for table_name in Base.metadata.tables.keys():
+                count = await db.execute(text("SELECT 1 FROM users LIMIT 1"))
+                if count.first():
+                    has_data = True
+                    break
+            if not has_data:
+                #injection données de test
+                from app.tests.data import get_test_data
+                test_data = get_test_data()
+                db.add_all(test_data)
+                await db.commit()
         db_status = "connected"
     except SQLAlchemyError as e:
         db_status = f"connection failed: {str(e)}"
     return db_status
 
-# ================================  Fonction de création de la base de données ========================
-def get_db() -> Generator[Session, None, None]:
-    db = SessionLocal()
-    try:
+# ================================  Fonction pour obtenir la session pour les requêtes ====================================================
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as db:
         yield db
-    finally:
-        db.close()
