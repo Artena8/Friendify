@@ -35,6 +35,7 @@ async def create_db():
     try:
         # Création des tables de la base de données
         async with engine.begin() as conn:
+            from app.models import user, friends
             await conn.run_sync(Base.metadata.create_all)
         
         # Connexion à la base de données pour vérifier s'il y a des données
