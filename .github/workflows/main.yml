@@ -16,6 +16,6 @@ jobs:
         uses: hostinger/deploy-on-vps@v2
         with:
             api-key: ${{ secrets.HOSTINGER_API_KEY }}
-            virtual-machine: "srv1100542"
+            virtual-machine: ${{ secrets.HOSTINGER_ID_SRV }}
             project-name: "friendify"
             docker-compose-path: "compose.yaml"
