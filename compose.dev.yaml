@@ -1,0 +1,77 @@
+services:
+  api:
+    build:
+      context: ./backend  
+    volumes:
+      - ./backend:/app  
+    container_name: api-dev
+    restart: unless-stopped
+    init: true
+    env_file: ./backend/.env  
+    ports:
+      - "8000:8000" 
+    networks:
+      - app-network  
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  tests:
+    container_name: test-api-dev
+    build:
+      context: ./backend
+    depends_on:
+      - api
+    volumes:
+      - ./backend:/app
+    networks:
+      - app-network
+    command: pytest
+
+  database:
+    container_name: database-dev
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_DATABASE: database
+      MYSQL_USER: user
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_TCP_PORT: 3306
+    ports:
+      - 3307:3306
+    volumes:
+      - my-db-volume:/var/lib/mysql
+    secrets:
+      - mysql_password
+      - mysql_root_password
+    networks:
+      - app-network
+
+  phpmyadmin:
+    container_name: phpmyadmin-dev
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      PMA_HOST: database-dev
+      MYSQL_USER: user
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+    ports:
+      - 8080:80
+    depends_on:
+      - database
+    secrets:
+      - mysql_password
+      - mysql_root_password
+    networks:
+      - app-network
+
+secrets:
+  mysql_password:
+    file: ./mysql_password.txt
+  mysql_root_password:
+    file: ./mysql_root_password.txt
+
+volumes:
+  my-db-volume:
+  
+networks:
+  app-network:
+    driver: bridge
