@@ -1,8 +1,8 @@
-name: Deploy on Hostinger VPS
+name: Deploy to Hostinger VPS
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main", "production" ]
 
 jobs:
   deploy:
@@ -10,18 +10,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
-      - name: Deploy to Hostinger VPS
-        uses: hostinger/deploy-action@v1
+      - name: Upload secrets to VPS
+        uses: appleboy/ssh-action@v0.1.7
         with:
-          api-key: ${{ secrets.HOSTINGER_API_KEY }}
-          virtual-machine: ${{ vars.HOSTINGER_VM_ID }}
-          personal-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          project-name: friendify
-          docker-compose-path: compose.prod.yaml
-
-          environment-variables: |
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            mkdir -p /root/Friendify
+            cat <<EOF > /root/Friendify/.env.prod
             DEBUG=${{ secrets.DEBUG }}
             SECRET_KEY=${{ secrets.SECRET_KEY }}
             ALGORITHM=${{ secrets.ALGORITHM }}
@@ -33,3 +32,18 @@ jobs:
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
 
             MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+            EOF
+
+      - name: Deploy via Docker Compose on VPS
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /root/Friendify
+            curl -o compose.prod.yaml https://raw.githubusercontent.com/${{ github.repository }}/main/compose.prod.yaml
+
+            docker compose -f compose.prod.yaml pull
+            docker compose -f compose.prod.yaml up -d --build --remove-orphans
+            docker system prune -f
