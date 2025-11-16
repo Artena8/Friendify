@@ -12,26 +12,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Add Secrets to VPS
-        uses: hostinger/add-secrets-to-vps@v1
+      - name: Deploy to Hostinger VPS
+        uses: hostinger/deploy-action@v1
         with:
           api-key: ${{ secrets.HOSTINGER_API_KEY }}
-          virtual-machine: ${{ secrets.HOSTINGER_ID_SRV }}
-          secrets: |
+          virtual-machine: ${{ vars.HOSTINGER_VM_ID }}
+          personal-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          project-name: friendify
+          docker-compose-path: compose.prod.yaml
+
+          environment-variables: |
             DEBUG=${{ secrets.DEBUG }}
             SECRET_KEY=${{ secrets.SECRET_KEY }}
             ALGORITHM=${{ secrets.ALGORITHM }}
+
             DB_HOST=${{ secrets.DB_HOST }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USER=${{ secrets.DB_USER }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
 
-      - name: Deploy on Hostinger VPS
-        uses: hostinger/deploy-on-vps@v2
-        with:
-          api-key: ${{ secrets.HOSTINGER_API_KEY }}
-          virtual-machine: ${{ secrets.HOSTINGER_ID_SRV }}
-          project-name: "friendify"
-          docker-compose-path: "compose.yaml"
+            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
