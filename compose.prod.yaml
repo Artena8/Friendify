@@ -15,7 +15,7 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
   database:
-    image: mysql:latest
+    image: mysql:8.0
     container_name: database
     restart: unless-stopped
     env_file:
