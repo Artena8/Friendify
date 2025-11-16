@@ -3,7 +3,7 @@ import asyncio
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker,declarative_base
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, OperationalError
 from sqlalchemy import text
 from typing import AsyncGenerator
 
@@ -29,6 +29,18 @@ AsyncSessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
+# ==================================================  On attend la database avant de lancer la database ============================================================
+async def wait_for_db():
+    while True:
+        try:
+            conn = await engine.connect()
+            await conn.close()
+            print("✅ MySQL is ready !")
+            return
+        except OperationalError as e:
+            print("⏳ Waiting for MySQL...", e)
+            await asyncio.sleep(2)
 
 # ================================  Fonction de création de la base de données & injection des données de test ========================
 async def create_db():

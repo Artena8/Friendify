@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from app.database.db import create_db
+from app.database.db import create_db, wait_for_db
 from app.api import user_router,auth_router
 from app.common.cors import add_cors_middleware
 
@@ -17,6 +17,7 @@ db_status = ""
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global db_status
+    await wait_for_db()
     db_status = await create_db()
     yield
     
