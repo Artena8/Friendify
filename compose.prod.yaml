@@ -9,10 +9,18 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     networks:
       - app-network
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    command: >
+      sh -c "
+        until mysqladmin ping -h database --silent; do
+          echo '⏳ Waiting for MySQL...';
+          sleep 2;
+        done;
+        uvicorn app.main:app --host 0.0.0.0 --port 8000
+      "
 
   database:
     image: mysql:8.0
@@ -32,6 +40,11 @@ services:
       - my-db-volume:/var/lib/mysql
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
@@ -46,7 +59,8 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     networks:
       - app-network
 
