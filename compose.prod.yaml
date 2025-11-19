@@ -41,8 +41,7 @@ services:
       - .env
     environment:
       PMA_HOST: database
-      PMA_USER: ${DB_USER}
-      PMA_PASSWORD: ${DB_PASSWORD}
+      PMA_ARBITRARY: 1
     ports:
       - "8080:80"
     depends_on:
