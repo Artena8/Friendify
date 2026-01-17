@@ -40,7 +40,7 @@ jobs:
 
   upload_env:
     needs: changes
-    if: needs.changes.outputs.compose == 'true'
+    if: needs.changes.outputs.compose == 'false'
     runs-on: ubuntu-latest
     steps:
       - name: Upload secrets to VPS
