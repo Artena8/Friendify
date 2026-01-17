@@ -77,6 +77,13 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            set -e
+
+            if [ ! -d "/root/Friendify/.git" ]; then
+              rm -rf /root/Friendify
+              git clone https://github.com/${{ github.repository }}.git /root/Friendify
+            fi
+
             cd /root/Friendify
             curl -o compose.prod.yaml https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/compose.prod.yaml
 
@@ -95,6 +102,13 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            set -e
+
+            if [ ! -d "/root/Friendify/.git" ]; then
+              rm -rf /root/Friendify
+              git clone https://github.com/${{ github.repository }}.git /root/Friendify
+            fi
+
             cd /root/Friendify
             curl -o compose.prod.yaml https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/compose.prod.yaml
 
