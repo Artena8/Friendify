@@ -12,7 +12,6 @@ jobs:
     outputs:
       backend: ${{ steps.detect.outputs.backend }}
       frontend: ${{ steps.detect.outputs.frontend }}
-      compose: ${{ steps.detect.outputs.compose }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -28,19 +27,15 @@ jobs:
 
           backend=false
           frontend=false
-          compose=false
 
           if echo "$CHANGED" | grep -qE '^backend/'; then backend=true; fi
           if echo "$CHANGED" | grep -qE '^frontend/'; then frontend=true; fi
-          if echo "$CHANGED" | grep -qE '^compose\.prod\.yaml$'; then compose=true; fi
 
           echo "backend=$backend" >> $GITHUB_OUTPUT
           echo "frontend=$frontend" >> $GITHUB_OUTPUT
-          echo "compose=$compose" >> $GITHUB_OUTPUT
 
   upload_env:
     needs: changes
-    if: needs.changes.outputs.compose == 'false'
     runs-on: ubuntu-latest
     steps:
       - name: Upload secrets to VPS
@@ -67,7 +62,7 @@ jobs:
 
   deploy_api:
     needs: [changes, upload_env]
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.compose == 'true'
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy API via Docker Compose on VPS
@@ -92,7 +87,7 @@ jobs:
 
   deploy_frontend:
     needs: [changes, upload_env]
-    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.compose == 'true'
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy Frontend via Docker Compose on VPS

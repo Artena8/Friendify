@@ -11,6 +11,7 @@ Cette API permet de :
 - Accéder à des profils enrichis
 - Connecter des amis entre eux
 - Gérer les préférences, cadeaux, santé, loisirs et bien plus encore !
+- Tests d'idées pour de futures fonctionnalités
 
 > Développée avec ❤ par **Artena8**.
 
