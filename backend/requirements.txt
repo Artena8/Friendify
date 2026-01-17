@@ -18,3 +18,8 @@ google-api-python-client>=2.0.0
 
 httpx
 pytest
+
+jinja2
+python-multipart
+qrcode[pil]
+playwright

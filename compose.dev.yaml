@@ -63,6 +63,21 @@ services:
     networks:
       - app-network
 
+  frontend-dev:
+    container_name: frontend-dev
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    command: npm run dev -- --host 0.0.0.0 --port 3000
+
 secrets:
   mysql_password:
     file: ./mysql_password.txt

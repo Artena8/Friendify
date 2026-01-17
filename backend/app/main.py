@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
+import os
 from fastapi import FastAPI
 
 from app.database.db import create_db, wait_for_db
-from app.api import user_router,auth_router
+from app.api import user_router,auth_router, idea_router
 from app.common.cors import add_cors_middleware
 
 from app.const import (
@@ -30,11 +31,16 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-add_cors_middleware(app)
+# ----------------------------------- CORS -----------------------------------
+cors_origins = os.getenv("CORS_ORIGINS", "")
+origins = [o.strip() for o in cors_origins.split(",") if o.strip()]
+
+add_cors_middleware(app,origins)
 
 # ----------------------------------- ROUTERS -----------------------------------
 app.include_router(user_router)
 app.include_router(auth_router)
+app.include_router(idea_router)
 
 # ----------------------------------- LAUNCH API -----------------------------------
 @app.get("/", summary="Base")

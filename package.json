@@ -1,0 +1,12 @@
+{
+  "name": "friendify",
+  "version": "1.0.0",
+  "description": "This project is composed of two main services: a Python FastAPI backend and a TypeScript-based mobile app. Both are containerized and orchestrated using Docker Compose.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

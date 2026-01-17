@@ -1,2 +1,2 @@
 include:
-  - compose.prod.yaml
+  - compose.dev.yaml

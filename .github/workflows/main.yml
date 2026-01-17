@@ -4,14 +4,45 @@ on:
   push:
     branches: [ "main", "production" ]
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  workflow_dispatch:
 
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.detect.outputs.backend }}
+      frontend: ${{ steps.detect.outputs.frontend }}
+      compose: ${{ steps.detect.outputs.compose }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
 
+      - name: Detect changes
+        id: detect
+        shell: bash
+        run: |
+          CHANGED="$(git diff --name-only HEAD^1 HEAD || true)"
+          echo "$CHANGED"
+
+          backend=false
+          frontend=false
+          compose=false
+
+          if echo "$CHANGED" | grep -qE '^backend/'; then backend=true; fi
+          if echo "$CHANGED" | grep -qE '^frontend/'; then frontend=true; fi
+          if echo "$CHANGED" | grep -qE '^compose\.prod\.yaml$'; then compose=true; fi
+
+          echo "backend=$backend" >> $GITHUB_OUTPUT
+          echo "frontend=$frontend" >> $GITHUB_OUTPUT
+          echo "compose=$compose" >> $GITHUB_OUTPUT
+
+  upload_env:
+    needs: changes
+    if: needs.changes.outputs.compose == 'true'
+    runs-on: ubuntu-latest
+    steps:
       - name: Upload secrets to VPS
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -30,9 +61,16 @@ jobs:
             DB_USER=${{ secrets.DB_USER }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
+            CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}
             EOF
 
-      - name: Deploy via Docker Compose on VPS
+  deploy_api:
+    needs: [changes, upload_env]
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.compose == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy API via Docker Compose on VPS
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -40,8 +78,25 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /root/Friendify
-            curl -o compose.prod.yaml https://raw.githubusercontent.com/${{ github.repository }}/main/compose.prod.yaml
+            curl -o compose.prod.yaml https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/compose.prod.yaml
 
-            docker compose -f compose.prod.yaml pull
-            docker compose -f compose.prod.yaml up -d --build --remove-orphans
+            docker compose -f compose.prod.yaml up -d --build api --remove-orphans
+            docker system prune -f
+
+  deploy_frontend:
+    needs: [changes, upload_env]
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.compose == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Frontend via Docker Compose on VPS
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /root/Friendify
+            curl -o compose.prod.yaml https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/compose.prod.yaml
+
+            docker compose -f compose.prod.yaml up -d --build frontend --remove-orphans
             docker system prune -f
