@@ -18,8 +18,8 @@ db_status = ""
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global db_status
-    await wait_for_db()
-    db_status = await create_db()
+    await wait_for_db() # On attend que la database soit prête
+    db_status = await create_db() # On crée la database et on injecte les données de test si nécessaire
     yield
     
 app = FastAPI(    
