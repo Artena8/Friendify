@@ -81,7 +81,7 @@ export default function SondagePage() {
             </button>
 
             {successMsg && (
-            <div style={{ padding: 12, borderRadius: 10, background: "#0F009B" }}>
+            <div style={{ padding: 12, borderRadius: 10, background: "#1F6D00" }}>
                 {successMsg}
             </div>
             )}
