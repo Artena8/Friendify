@@ -89,8 +89,8 @@ jobs:
             docker system prune -f
 
   deploy_api:
-    needs: [changes, upload_env]
-    if: needs.changes.outputs.backend == 'true'
+    needs: [changes, upload_env, deploy_infra]
+    if: needs.changes.outputs.backend == 'false'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy API via Docker Compose on VPS
@@ -112,8 +112,8 @@ jobs:
             docker system prune -f
 
   deploy_frontend:
-    needs: [changes, upload_env]
-    if: needs.changes.outputs.frontend == 'true'
+    needs: [changes, upload_env, deploy_infra]
+    if: needs.changes.outputs.frontend == 'false'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy Frontend via Docker Compose on VPS

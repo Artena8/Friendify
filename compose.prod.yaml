@@ -120,6 +120,7 @@ services:
 
 volumes:
   my-db-volume:
+  traefik_letsencrypt:
 
 networks:
   app-network:
