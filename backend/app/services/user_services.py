@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 
 async def get_user_by_username(db: AsyncSession, username: str) -> User:
-    stmt = select(User).filter(User.name == username)
+    stmt = select(User).filter(User.username == username)
     result = await db.execute(stmt)  
     return result.scalars().first()  
 

@@ -20,6 +20,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik_letsencrypt:/letsencrypt
     networks:
+      - web
       - app-network
     labels:
       - traefik.enable=true
@@ -121,5 +122,7 @@ volumes:
   traefik_letsencrypt:
 
 networks:
+  web:
+    external: true
   app-network:
     driver: bridge

@@ -34,7 +34,7 @@ async def login(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        token = create_access_token(data={"sub": user.name})
+        token = create_access_token(data={"sub": user.username})
         return {"access_token": token, "token_type": "bearer"}
 
     except ValidationError as e:
@@ -47,12 +47,8 @@ async def login(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Requête invalide : {str(e)}",
         )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erreur interne : {str(e)}",
-        )
-        
+
+
 @auth_router.get("/me", summary="Récupérer l'utilisateur connecté")
 async def read_users_me(current_user: User = Depends(get_current_user)):
-    return {"name": current_user.name, "id": current_user.id}
+    return {"name": current_user.username, "id": current_user.id}
