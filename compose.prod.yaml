@@ -24,6 +24,7 @@ services:
       - app-network
     labels:
       - traefik.enable=true
+      - traefik.docker.network=web
       - traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)
       - traefik.http.routers.http-catchall.entrypoints=web
       - traefik.http.routers.http-catchall.middlewares=redirect-to-https
@@ -46,11 +47,13 @@ services:
       - "8000:8000"
     depends_on:
       - database
-    networks:
-      - app-network
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    networks:
+      - web
+      - app-network
     labels:
       - traefik.enable=true
+      - traefik.docker.network=web
       - traefik.http.routers.api.rule=Host(`api.hellyow.pro`)
       - traefik.http.routers.api.entrypoints=websecure
       - traefik.http.routers.api.tls.certresolver=le
@@ -90,9 +93,11 @@ services:
     depends_on:
       - database
     networks:
+      - web
       - app-network
     labels:
       - traefik.enable=true
+      - traefik.docker.network=web
       - traefik.http.routers.db.rule=Host(`db.hellyow.pro`)
       - traefik.http.routers.db.entrypoints=websecure
       - traefik.http.routers.db.tls.certresolver=le
@@ -109,9 +114,11 @@ services:
     container_name: frontend
     restart: unless-stopped
     networks:
+      - web
       - app-network
     labels:
       - traefik.enable=true
+      - traefik.docker.network=web
       - traefik.http.routers.front.rule=Host(`hellyow.pro`)
       - traefik.http.routers.front.entrypoints=websecure
       - traefik.http.routers.front.tls.certresolver=le
