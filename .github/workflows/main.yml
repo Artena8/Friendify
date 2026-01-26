@@ -46,7 +46,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             mkdir -p /root/Friendify
-            cat <<EOF > /root/Friendify/.env
+            cat <<'EOF' > /root/Friendify/.env
             DEBUG=${{ secrets.DEBUG }}
             SECRET_KEY=${{ secrets.SECRET_KEY }}
             ALGORITHM=${{ secrets.ALGORITHM }}
