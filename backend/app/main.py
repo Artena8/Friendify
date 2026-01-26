@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 
 from app.database.db import create_db, wait_for_db
-from app.api import user_router,auth_router, idea_router
+from app.api import user_router,auth_router, idea_router, review_router
 from app.common.cors import add_cors_middleware
 
 from app.const import (
@@ -41,6 +41,7 @@ add_cors_middleware(app,origins)
 app.include_router(user_router)
 app.include_router(auth_router)
 app.include_router(idea_router)
+app.include_router(review_router)
 
 # ----------------------------------- LAUNCH API -----------------------------------
 @app.get("/", summary="Base")

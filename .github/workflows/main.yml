@@ -90,7 +90,7 @@ jobs:
 
   deploy_api:
     needs: [changes, upload_env, deploy_infra]
-    if: needs.changes.outputs.backend == 'false'
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy API via Docker Compose on VPS
@@ -113,7 +113,7 @@ jobs:
 
   deploy_frontend:
     needs: [changes, upload_env, deploy_infra]
-    if: needs.changes.outputs.frontend == 'false'
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy Frontend via Docker Compose on VPS
